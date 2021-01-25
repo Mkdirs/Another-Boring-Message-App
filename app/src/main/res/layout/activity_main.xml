@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/darkGray"
+    tools:context=".MainActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
+
+        <ImageView
+            android:id="@+id/main_user_icon_image_view"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/ic_user"
+            android:layout_alignParentTop="true"
+            android:layout_centerInParent="true"/>
+
+        <TextView
+            android:id="@+id/main_username_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/main_user_icon_image_view"
+            android:textColor="@color/lightGray"
+            android:text="User"/>
+
+        <LinearLayout
+            android:layout_below="@id/main_username_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/lightBlue"
+                android:layout_gravity="center_horizontal"
+                android:textSize="20sp"
+                android:text="Last Messages"/>
+
+            <ListView
+                android:id="@+id/main_last_messages_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            </ListView>
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
