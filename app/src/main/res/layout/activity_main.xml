@@ -47,10 +47,10 @@
                 android:textColor="@color/lightBlue"
                 android:layout_gravity="center_horizontal"
                 android:textSize="20sp"
-                android:text="Last Messages"/>
+                android:text="Conversations"/>
 
             <ListView
-                android:id="@+id/main_last_messages_list_view"
+                android:id="@+id/main_chats_preview_list_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 

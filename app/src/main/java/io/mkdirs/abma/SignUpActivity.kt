@@ -11,7 +11,7 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.FirebaseDatabase
+import io.mkdirs.abma.utils.DB
 import io.mkdirs.abma.utils.PASSWORD_PREFS_KEY
 import io.mkdirs.abma.utils.PREFS_NAME
 import kotlinx.android.synthetic.main.activity_sign_up.*
@@ -21,14 +21,13 @@ import java.util.*
 class SignUpActivity : AppCompatActivity(), OnCompleteListener<DataSnapshot>{
 
     lateinit var auth:FirebaseAuth
-    lateinit var db:FirebaseDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sign_up)
         signup_error_message_text_view.visibility = View.INVISIBLE
         auth = FirebaseAuth.getInstance()
-        db = FirebaseDatabase.getInstance()
+        DB.goOnline()
     }
 
 
@@ -91,7 +90,7 @@ class SignUpActivity : AppCompatActivity(), OnCompleteListener<DataSnapshot>{
                 val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                 prefs.edit().putString(PASSWORD_PREFS_KEY, password).apply()
                 val uid = auth.currentUser?.uid
-                db.getReference("users/$uid").setValue(mapOf("username" to username, "email" to email))
+                DB.getReference("users/$uid").setValue(mapOf("username" to username, "email" to email))
                 auth.currentUser?.sendEmailVerification()?.addOnCompleteListener {emailVerifTask ->
                     if(emailVerifTask.isSuccessful){
                         startActivity(Intent(applicationContext, EmailVerificationActivity::class.java))
@@ -119,7 +118,7 @@ class SignUpActivity : AppCompatActivity(), OnCompleteListener<DataSnapshot>{
             return
 
         //searching for matching username
-        db.getReference("users").get().addOnCompleteListener(this)
+        DB.getReference("users").get().addOnCompleteListener(this)
 
     }
 

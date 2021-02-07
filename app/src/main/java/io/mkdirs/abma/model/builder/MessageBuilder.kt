@@ -6,8 +6,8 @@ import io.mkdirs.abma.model.User
 
 class MessageBuilder {
     private var uid = ""
-    private var author:User? = null
-    private var chat:Chat? = null
+    private var author = ""
+    private var chat = ""
     private var content = ""
     private var timestamp:Long = 0
 
@@ -16,12 +16,12 @@ class MessageBuilder {
         return this
     }
 
-    fun author(author:User):MessageBuilder{
+    fun author(author:String):MessageBuilder{
         this.author = author
         return this
     }
 
-    fun chat(chat:Chat):MessageBuilder{
+    fun chat(chat:String):MessageBuilder{
         this.chat = chat
         return this
     }

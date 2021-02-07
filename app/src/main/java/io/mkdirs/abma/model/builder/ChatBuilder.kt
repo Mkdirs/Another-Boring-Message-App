@@ -6,17 +6,23 @@ import io.mkdirs.abma.model.User
 
 class ChatBuilder {
     private var uid = ""
-    private var owner: User? = null
+    private var name = ""
+    private var owner = ""
     private var type = ""
-    private var lastMessage: Message? = null
-    private var participants = mutableListOf<User>()
+    private var lastMessage = ""
+    private var participants = 0
 
     fun uid(uid:String):ChatBuilder{
         this.uid = uid
         return this
     }
 
-    fun owner(owner:User):ChatBuilder{
+    fun name(name:String):ChatBuilder{
+        this.name = name
+        return this
+    }
+
+    fun owner(owner:String):ChatBuilder{
         this.owner = owner
         return this
     }
@@ -26,22 +32,18 @@ class ChatBuilder {
         return this
     }
 
-    fun lastMessage(lastMessage: Message):ChatBuilder{
+    fun lastMessage(lastMessage: String):ChatBuilder{
         this.lastMessage = lastMessage
         return this
     }
 
-    fun participants(vararg participants:User):ChatBuilder{
-        this.participants = participants.toMutableList()
+    fun participants(participants:Int):ChatBuilder{
+        this.participants = participants
         return this
     }
 
-    fun addParticipant(participant:User):ChatBuilder{
-        this.participants.add(participant)
-        return this
-    }
 
     fun build(): Chat {
-        return Chat(this.uid, this.owner!!, this.type, this.lastMessage!!, this.participants.toTypedArray())
+        return Chat(this.uid, this.name, this.owner, this.type, this.lastMessage, this.participants)
     }
 }

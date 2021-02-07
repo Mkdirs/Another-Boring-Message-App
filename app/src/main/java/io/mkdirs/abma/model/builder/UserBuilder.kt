@@ -7,7 +7,6 @@ class UserBuilder {
     private var uid = ""
     private var name = ""
     private var email = ""
-    private var chats = mutableListOf<Chat>()
 
     fun uid(uid:String):UserBuilder{
         this.uid = uid
@@ -24,17 +23,7 @@ class UserBuilder {
         return this
     }
 
-    fun chats(vararg chats:Chat):UserBuilder{
-        this.chats = chats.toMutableList()
-        return this
-    }
-
-    fun addChat(chat:Chat):UserBuilder{
-        this.chats.add(chat)
-        return this
-    }
-
     fun build(): User {
-        return User(this.uid, this.name, this.email, this.chats.toTypedArray())
+        return User(this.uid, this.name, this.email)
     }
 }
