@@ -2,13 +2,14 @@ package io.mkdirs.abma
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import androidx.fragment.app.Fragment
 import com.google.android.gms.tasks.Tasks
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import io.mkdirs.abma.controller.ChatAdapter
+import io.mkdirs.abma.fragment.ConversationsFragment
+import io.mkdirs.abma.fragment.ProfileFragment
 import io.mkdirs.abma.model.Chat
 import io.mkdirs.abma.model.User
 import io.mkdirs.abma.utils.DB
@@ -23,17 +24,34 @@ class MainActivity : AppCompatActivity(), ChildEventListener {
 
         adapter = ChatAdapter(this)
         adapter.setNotifyOnChange(false)
+
         DB.goOnline()
         DB.getReference("chats").addChildEventListener(this)
 
+        val profileFragment = ProfileFragment()
+        val conversationsFragment = ConversationsFragment(adapter)
+        makeCurrentFragment(conversationsFragment)
 
-        main_chats_preview_list_view.adapter = adapter
-        main_username_text_view.text = User.currentUser?.name
+        main_bottom_navigation_view.setOnNavigationItemSelectedListener {
+            when(it.itemId){
+                R.id.bottom_profile -> makeCurrentFragment(profileFragment)
 
+                R.id.bottom_conversations -> makeCurrentFragment(conversationsFragment)
+            }
+
+            true
+        }
+    }
+
+    private fun makeCurrentFragment(fragment: Fragment){
+        supportFragmentManager.beginTransaction().apply {
+            replace(R.id.main_wrapper_frame_layout, fragment)
+            commit()
+        }
     }
 
 
-    suspend fun notifyChatAsync(chat:Chat){
+    private suspend fun notifyChatAsync(chat: Chat){
         GlobalScope.launch {
             adapter.fetchLastMessage(chat)
             withContext(Dispatchers.Main){
@@ -53,7 +71,7 @@ class MainActivity : AppCompatActivity(), ChildEventListener {
 
     override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
         GlobalScope.launch {
-            val chat = async{Chat.fromDB(snapshot.key!!)}.await()
+            val chat = async{ Chat.fromDB(snapshot.key!!)}.await()
             val data = Tasks.await(DB.getReference("chats_participants/${chat.uid}").get())
             if(data.hasChild(User.currentUser!!.uid)){
                 withContext(Dispatchers.Main) {
@@ -67,7 +85,7 @@ class MainActivity : AppCompatActivity(), ChildEventListener {
 
     override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
         GlobalScope.launch {
-            val chat = async{Chat.fromDB(snapshot.key!!)}.await()
+            val chat = async{ Chat.fromDB(snapshot.key!!)}.await()
             val data = Tasks.await(DB.getReference("chats_participants/${chat.uid}").get())
             if(data.hasChild(User.currentUser!!.uid)){
                 withContext(Dispatchers.Main){
@@ -89,4 +107,5 @@ class MainActivity : AppCompatActivity(), ChildEventListener {
             }
         }
     }
+
 }

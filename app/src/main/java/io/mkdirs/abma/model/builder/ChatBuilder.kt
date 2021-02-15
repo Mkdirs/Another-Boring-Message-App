@@ -10,7 +10,7 @@ class ChatBuilder {
     private var owner = ""
     private var type = ""
     private var lastMessage = ""
-    private var participants = 0
+    private var participants = mutableListOf<User>()
 
     fun uid(uid:String):ChatBuilder{
         this.uid = uid
@@ -37,13 +37,13 @@ class ChatBuilder {
         return this
     }
 
-    fun participants(participants:Int):ChatBuilder{
-        this.participants = participants
+    fun participants(vararg participants:User):ChatBuilder{
+        this.participants = participants.toMutableList()
         return this
     }
 
 
     fun build(): Chat {
-        return Chat(this.uid, this.name, this.owner, this.type, this.lastMessage, this.participants)
+        return Chat(this.uid, this.name, this.owner, this.type, this.lastMessage, this.participants.toTypedArray())
     }
 }

@@ -8,7 +8,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
-data class Chat(val uid:String, val name:String, val owner:String, val type:String, val lastMessage:String, val participants:Int) {
+data class Chat(val uid:String, val name:String, val owner:String, val type:String, val lastMessage:String, val participants:Array<User>) {
 
     companion object{
         suspend fun fromDB(uid:String): Chat{
@@ -17,14 +17,18 @@ data class Chat(val uid:String, val name:String, val owner:String, val type:Stri
                 val rawChat = Tasks.await(DB.getReference("chats/$uid").get()).value as Map<String, String>
                 val chatName = rawChat["name"]!!
                 val chatOwner = rawChat["owner"]!!
+                val chatType = rawChat["type"]!!
                 val chatLastMessage = rawChat["last_message"]!!
-                val chatParticipants = rawChat["participants"]!!.toInt()
+                val chatParticipants = Tasks.await(DB.getReference("chats_participants/$uid").get()).children.map { async{User.fromDB(it.key!!)}.await() }
+
+
 
                 builder.uid(uid)
                     .owner(chatOwner)
                     .name(chatName)
                     .lastMessage(chatLastMessage)
-                    .participants(chatParticipants)
+                    .participants(*chatParticipants.toTypedArray())
+                    .type(chatType)
             }.join()
 
             return builder.build()
