@@ -25,7 +25,6 @@ class LoginActivity : AppCompatActivity() {
         login_error_message_text_view.visibility = View.INVISIBLE
 
         auth = FirebaseAuth.getInstance()
-        DB.goOnline()
     }
 
     fun login(view:View){

@@ -19,28 +19,32 @@ import io.mkdirs.abma.model.User
 import io.mkdirs.abma.utils.DATABASE_NULL
 import io.mkdirs.abma.utils.GROUP_CHAT_TYPE
 import io.mkdirs.abma.utils.PRIVATE_MESSAGES_CHAT_TYPE
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
 import kotlin.time.hours
 
 class ChatAdapter(context:Context): ArrayAdapter<Chat>(context, android.R.layout.simple_list_item_1){
-    val inflater = LayoutInflater.from(context)
-    val messages = mutableMapOf<Chat, Message>()
-    val authorsUsernames = mutableMapOf<String, String>()
+    private val inflater = LayoutInflater.from(context)
+    private val messages = mutableMapOf<Chat, Message>()
+    private val authorsUsernames = mutableMapOf<String, String>()
 
-    suspend fun fetchLastMessage(chat:Chat){
-        if(chat.lastMessage == DATABASE_NULL)
+
+
+    override fun add(`object`: Chat?) {
+        if(`object`!!.lastMessage == DATABASE_NULL){
+            super.add(`object`)
             return
+        }
 
         GlobalScope.launch {
-            messages[chat] = async{Message.fromDB(chat.lastMessage) }.await()
-            authorsUsernames[messages[chat]!!.author] = async{User.fromDB(messages[chat]!!.author)}.await().name
-        }.join()
+            messages[`object`] = async{Message.fromDB(`object`.lastMessage) }.await()
+            authorsUsernames[messages[`object`]!!.author] = async{User.fromDB(messages[`object`]!!.author)}.await().name
+            withContext(Dispatchers.Main){
+                super.add(`object`)
+            }
+        }
     }
 
 
@@ -72,23 +76,29 @@ class ChatAdapter(context:Context): ArrayAdapter<Chat>(context, android.R.layout
 
             else -> DATABASE_NULL
         }
-        view.findViewById<TextView>(R.id.chat_preview_chat_participants).text = "(${chat.participants.size} participants)"
+
+        view.findViewById<TextView>(R.id.chat_preview_chat_participants).text = when(chat.type){
+            GROUP_CHAT_TYPE -> "(${chat.participants.size})"
+
+            else -> ""
+        }
+
 
         if(chat.lastMessage == DATABASE_NULL){
-            view.findViewById<RelativeLayout>(R.id.chat_preview_chat_section).visibility = View.INVISIBLE
+            view.findViewById<RelativeLayout>(R.id.chat_preview_message_section).visibility = View.INVISIBLE
             return view
         }
 
-        view.findViewById<TextView>(R.id.chat_preview_last_message_username).text = authorsUsernames[messages[chat]!!.author]
+        view.findViewById<TextView>(R.id.chat_preview_last_message_username).text = authorsUsernames[messages[chat]?.author]
 
         if(messages[chat]!!.author == User.currentUser!!.uid)
             view.findViewById<ImageView>(R.id.chat_preview_arraow).rotation = 180f
 
-        val daysOffset = ((messages[chat]!!.timestamp - System.currentTimeMillis())/1000f /3600 /24).roundToInt()
+        val daysOffset = ((System.currentTimeMillis() - messages[chat]!!.timestamp)/1000f /3600 /24).roundToInt()
 
         val timeInfo = when(daysOffset){
-            in 0 until 24 -> "Today"
-            in 24 until 48 -> "Yesterday"
+            in 0 until 1 -> "Today"
+            in 1 until 2 -> "Yesterday"
             else -> SimpleDateFormat("dd/MM/yyyy").format(Date(messages[chat]!!.timestamp))
         }
 

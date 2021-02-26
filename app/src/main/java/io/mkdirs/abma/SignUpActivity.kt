@@ -27,7 +27,6 @@ class SignUpActivity : AppCompatActivity(), OnCompleteListener<DataSnapshot>{
         setContentView(R.layout.activity_sign_up)
         signup_error_message_text_view.visibility = View.INVISIBLE
         auth = FirebaseAuth.getInstance()
-        DB.goOnline()
     }
 
 

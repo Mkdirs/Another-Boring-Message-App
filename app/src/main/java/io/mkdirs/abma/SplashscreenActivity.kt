@@ -22,7 +22,6 @@ class SplashscreenActivity : AppCompatActivity() {
         setContentView(R.layout.activity_splashscreen)
 
         auth = FirebaseAuth.getInstance()
-        DB.goOnline()
         val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
 

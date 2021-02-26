@@ -2,6 +2,7 @@ package io.mkdirs.abma
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.database.ChildEventListener
@@ -11,26 +12,27 @@ import io.mkdirs.abma.controller.ChatAdapter
 import io.mkdirs.abma.fragment.ConversationsFragment
 import io.mkdirs.abma.fragment.ProfileFragment
 import io.mkdirs.abma.model.Chat
+import io.mkdirs.abma.model.Message
 import io.mkdirs.abma.model.User
 import io.mkdirs.abma.utils.DB
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
+import java.util.Comparator
 
 class MainActivity : AppCompatActivity(), ChildEventListener {
     lateinit var adapter:ChatAdapter
+    lateinit var profileFragment:ProfileFragment
+    lateinit var conversationsFragment:ConversationsFragment
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         adapter = ChatAdapter(this)
-        adapter.setNotifyOnChange(false)
 
-        DB.goOnline()
         DB.getReference("chats").addChildEventListener(this)
 
-        val profileFragment = ProfileFragment()
-        val conversationsFragment = ConversationsFragment(adapter)
-        makeCurrentFragment(conversationsFragment)
+        profileFragment = ProfileFragment()
+        conversationsFragment = ConversationsFragment(adapter)
 
         main_bottom_navigation_view.setOnNavigationItemSelectedListener {
             when(it.itemId){
@@ -41,6 +43,8 @@ class MainActivity : AppCompatActivity(), ChildEventListener {
 
             true
         }
+
+        main_bottom_navigation_view.selectedItemId = R.id.bottom_conversations
     }
 
     private fun makeCurrentFragment(fragment: Fragment){
@@ -50,16 +54,6 @@ class MainActivity : AppCompatActivity(), ChildEventListener {
         }
     }
 
-
-    private suspend fun notifyChatAsync(chat: Chat){
-        GlobalScope.launch {
-            adapter.fetchLastMessage(chat)
-            withContext(Dispatchers.Main){
-                adapter.notifyDataSetChanged()
-                adapter.setNotifyOnChange(false)
-            }
-        }.join()
-    }
 
     override fun onCancelled(error: DatabaseError) {
         //Do not touch
@@ -78,7 +72,6 @@ class MainActivity : AppCompatActivity(), ChildEventListener {
                     adapter.remove(chat)
                     adapter.add(chat)
                 }
-                notifyChatAsync(chat)
             }
         }
     }
@@ -91,7 +84,6 @@ class MainActivity : AppCompatActivity(), ChildEventListener {
                 withContext(Dispatchers.Main){
                     adapter.add(chat)
                 }
-                notifyChatAsync(chat)
             }
         }
     }
@@ -101,8 +93,6 @@ class MainActivity : AppCompatActivity(), ChildEventListener {
             val chat = adapter.getItem(i)
             if(chat?.uid == snapshot.key){
                 adapter.remove(chat)
-                adapter.notifyDataSetChanged()
-                adapter.setNotifyOnChange(false)
                 break
             }
         }

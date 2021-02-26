@@ -17,7 +17,6 @@ class EmailVerificationActivity : AppCompatActivity() {
         setContentView(R.layout.activity_email_verification)
 
         auth = FirebaseAuth.getInstance()
-        DB.goOnline()
     }
 
     override fun onBackPressed() {

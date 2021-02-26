@@ -30,6 +30,8 @@
             android:id="@+id/chat_activity_messages_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:divider="@color/darkGray"
+            android:dividerHeight="20dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentRight="true"
             android:layout_below="@id/chat_activity_chat_name"
@@ -64,15 +66,17 @@
                 android:background="@color/blue"
                 />
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/chat_activity_send"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                app:tint="@color/blue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:src="@drawable/ic_send"
-                android:layout_marginRight="10dp"
+                android:tint="@color/blue"
+                android:backgroundTint="@color/darkGray"
+                android:onClick="sendMessage"
                 android:layout_centerVertical="true"
-                android:layout_alignParentRight="true"/>
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="10dp"/>
 
         </RelativeLayout>
 
