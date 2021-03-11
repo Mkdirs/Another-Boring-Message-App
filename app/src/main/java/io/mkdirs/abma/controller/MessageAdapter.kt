@@ -10,6 +10,7 @@ import io.mkdirs.abma.R
 import io.mkdirs.abma.model.Message
 import io.mkdirs.abma.model.User
 import kotlinx.coroutines.*
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
@@ -21,12 +22,15 @@ class MessageAdapter(context:Context): ArrayAdapter<Message>(context, android.R.
 
     override fun add(msg: Message?) {
         GlobalScope.launch {
-            authorsUsernames[msg!!.author] = async{ User.fromDB(msg!!.author)}.await().name
+            if(!authorsUsernames.containsKey(msg!!.author))
+                authorsUsernames[msg.author] = async{ User.fromDB(msg.author)}.await().name
+
             withContext(Dispatchers.Main){
                 super.add(msg)
             }
         }
     }
+
 
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -38,16 +42,17 @@ class MessageAdapter(context:Context): ArrayAdapter<Message>(context, android.R.
 
         val daysOffset = ((System.currentTimeMillis() - msg.timestamp)/1000f /3600 /24).roundToInt()
 
+        val dateObj = Date(msg.timestamp)
+
         val timeInfo = when(daysOffset){
             in 0 until 1 -> "Today"
             in 1 until 2 -> "Yesterday"
-            else -> SimpleDateFormat("dd/MM/yyyy").format(Date(msg.timestamp))
+            else -> DateFormat.getDateInstance(DateFormat.SHORT).format(dateObj)
         }
 
-        val dateFormat = SimpleDateFormat("hh:mm")
-        val date = Date(msg.timestamp)
+        val dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
 
-        view.findViewById<TextView>(R.id.message_timestamp).text = dateFormat.format(date)+" ($timeInfo)"
+        view.findViewById<TextView>(R.id.message_timestamp).text = dateFormat.format(dateObj)+" ($timeInfo)"
 
         view.findViewById<TextView>(R.id.message_content).text = msg.content
 

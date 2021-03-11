@@ -20,6 +20,7 @@ import io.mkdirs.abma.utils.DATABASE_NULL
 import io.mkdirs.abma.utils.GROUP_CHAT_TYPE
 import io.mkdirs.abma.utils.PRIVATE_MESSAGES_CHAT_TYPE
 import kotlinx.coroutines.*
+import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
@@ -56,8 +57,10 @@ class ChatAdapter(context:Context): ArrayAdapter<Chat>(context, android.R.layout
 
     override fun remove(`object`: Chat?) {
         super.remove(`object`)
-        authorsUsernames.remove(messages[`object`]!!.author)
-        messages.remove(`object`)
+        if(`object`!!.lastMessage != DATABASE_NULL) {
+            authorsUsernames.remove(messages[`object`]!!.author)
+            messages.remove(`object`)
+        }
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -96,16 +99,17 @@ class ChatAdapter(context:Context): ArrayAdapter<Chat>(context, android.R.layout
 
         val daysOffset = ((System.currentTimeMillis() - messages[chat]!!.timestamp)/1000f /3600 /24).roundToInt()
 
+        val dateObj = Date(messages[chat]!!.timestamp)
+
         val timeInfo = when(daysOffset){
             in 0 until 1 -> "Today"
             in 1 until 2 -> "Yesterday"
-            else -> SimpleDateFormat("dd/MM/yyyy").format(Date(messages[chat]!!.timestamp))
+            else -> DateFormat.getDateInstance(DateFormat.SHORT).format(dateObj)
         }
 
-        val dateFormat = SimpleDateFormat("hh:mm")
-        val date = Date(messages[chat]!!.timestamp)
+        val dateFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
 
-        view.findViewById<TextView>(R.id.chat_preview_last_message_timestamp).text = dateFormat.format(date)+" ($timeInfo)"
+        view.findViewById<TextView>(R.id.chat_preview_last_message_timestamp).text = dateFormat.format(dateObj)+" ($timeInfo)"
 
         view.findViewById<TextView>(R.id.chat_preview_last_message).text = messages[chat]!!.content
         return view

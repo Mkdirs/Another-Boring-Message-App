@@ -2,6 +2,7 @@ package io.mkdirs.abma
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import com.google.android.gms.tasks.Tasks
@@ -68,10 +69,22 @@ class MainActivity : AppCompatActivity(), ChildEventListener {
             val chat = async{ Chat.fromDB(snapshot.key!!)}.await()
             val data = Tasks.await(DB.getReference("chats_participants/${chat.uid}").get())
             if(data.hasChild(User.currentUser!!.uid)){
-                withContext(Dispatchers.Main) {
-                    adapter.remove(chat)
-                    adapter.add(chat)
+                var ind = -1
+                for(i in 0 until adapter.count){
+                    if(adapter.getItem(i) == chat){
+                        ind = i
+                        break
+                    }
                 }
+
+                if(ind != -1){
+                    withContext(Dispatchers.Main) {
+                        adapter.remove(adapter.getItem(ind))
+                        adapter.add(chat)
+                    }
+                }
+
+
             }
         }
     }

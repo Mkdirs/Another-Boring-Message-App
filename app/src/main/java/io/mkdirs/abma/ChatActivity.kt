@@ -55,6 +55,7 @@ class ChatActivity : AppCompatActivity(), ChildEventListener, TextWatcher {
 
     fun sendMessage(view:View){
         val content = chat_activity_edit_text.text.toString().trim()
+        chat_activity_edit_text.setText("")
         val message = MessageBuilder()
             .uid(UUID.randomUUID().toString())
             .author(User.currentUser!!.uid)
@@ -64,7 +65,6 @@ class ChatActivity : AppCompatActivity(), ChildEventListener, TextWatcher {
             .build()
 
         Message.toDB(message)
-        chat_activity_edit_text.text.clear()
     }
 
     override fun onBackPressed() {
