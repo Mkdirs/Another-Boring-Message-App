@@ -29,6 +29,7 @@ import java.util.*
 class ChatActivity : AppCompatActivity(), ChildEventListener, TextWatcher {
 
     lateinit var adapter:MessageAdapter
+    val messages = mutableListOf<Message>()
 
     companion object{
         var openedChat:Chat? = null
@@ -48,7 +49,7 @@ class ChatActivity : AppCompatActivity(), ChildEventListener, TextWatcher {
         chat_activity_edit_text.addTextChangedListener(this)
         setSendButtonState(false)
 
-        adapter = MessageAdapter(this)
+        adapter = MessageAdapter(this, messages)
         DB.getReference("messages").addChildEventListener(this)
         chat_activity_messages_list.adapter = adapter
     }
@@ -117,10 +118,10 @@ class ChatActivity : AppCompatActivity(), ChildEventListener, TextWatcher {
 
         GlobalScope.launch {
             val msg = async { Message.fromDB(snapshot.key!!) }.await()
-            withContext(Dispatchers.Main){
-                adapter.add(msg)
-                adapter.sort { msg1, msg2 -> (msg2.timestamp-msg1.timestamp).toInt() }
-            }
+            messages.add(msg)
+            adapter.updateMetadata(msg)
+            messages.sortBy{it.timestamp}
+            withContext(Dispatchers.Main){adapter.notifyDataSetChanged()}
         }
     }
 
@@ -128,13 +129,7 @@ class ChatActivity : AppCompatActivity(), ChildEventListener, TextWatcher {
         if(snapshot.child("chat").value != openedChat!!.uid)
             return
 
-        for(i in 0 until adapter.count){
-            val msg = adapter.getItem(i)!!
-
-            if(msg.uid == snapshot.key!!){
-                adapter.remove(msg)
-                break
-            }
-        }
+        messages.removeAt(messages.indexOfFirst { it.uid == snapshot.key!! })
+        adapter.notifyDataSetChanged()
     }
 }

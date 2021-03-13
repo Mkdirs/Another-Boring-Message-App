@@ -15,22 +15,29 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
 
-class MessageAdapter(context:Context): ArrayAdapter<Message>(context, android.R.layout.simple_list_item_1) {
+class MessageAdapter(context:Context, messages:MutableList<Message>): ArrayAdapter<Message>(context, android.R.layout.simple_list_item_1, messages) {
     private val inflater = LayoutInflater.from(context)
     private val authorsUsernames = mutableMapOf<String, String>()
 
 
     override fun add(msg: Message?) {
         GlobalScope.launch {
-            if(!authorsUsernames.containsKey(msg!!.author))
-                authorsUsernames[msg.author] = async{ User.fromDB(msg.author)}.await().name
 
+            updateMetadata(msg!!)
             withContext(Dispatchers.Main){
                 super.add(msg)
             }
         }
     }
 
+
+    suspend fun updateMetadata(msg:Message){
+        coroutineScope {
+            if(!authorsUsernames.containsKey(msg.author))
+                authorsUsernames[msg.author] = async{ User.fromDB(msg.author)}.await().name
+        }
+
+    }
 
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
